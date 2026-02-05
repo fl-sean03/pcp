@@ -1,0 +1,126 @@
+# PCP (Personal Control Plane) Configuration
+# Externalized settings for easy modification without code changes
+
+# Worker agent settings
+worker:
+  timeout_seconds: 600
+  max_concurrent: 1
+  container_name: pcp-agent
+  poll_interval_seconds: 60
+
+# Scheduler settings
+scheduler:
+  daily_brief_hour: 8      # 8 AM
+  eod_digest_hour: 18      # 6 PM
+  weekly_summary_day: 0    # Monday
+  reminder_interval_minutes: 60
+  poll_interval_seconds: 300
+
+# Threshold settings for various detections
+thresholds:
+  # Relationship tracking
+  stale_relationship_days: 14
+  never_contacted_threshold: 3  # mentions without contact
+
+  # Project health
+  project_stale_days: 30
+  project_needs_attention_days: 14
+
+  # Pattern detection
+  repeated_topic_threshold: 3
+  repeated_topic_days: 7
+
+  # Task tracking
+  overdue_warning_days: 1
+
+# Database settings
+database:
+  # Container path (when running in Docker)
+  container_path: /workspace/vault/vault.db
+  # Local development path (relative to project root)
+  local_path: vault/vault.db
+
+# Brief generation settings
+briefs:
+  default_lookback_days: 7
+  meeting_prep_capture_limit: 10
+  daily_capture_limit: 20
+  max_stale_relationships: 10
+
+# Search settings
+search:
+  default_limit: 20
+  semantic_enabled: true
+  hybrid_weight: 0.7  # Weight for semantic vs keyword
+
+# Embedding settings
+embeddings:
+  enabled: true
+  collection_name: pcp_captures
+  model: all-MiniLM-L6-v2
+  distance_threshold: 0.7
+
+# Discord integration
+discord:
+  attachment_directory: /tmp/discord_attachments
+  max_attachment_size_mb: 25
+
+# OneDrive integration
+onedrive:
+  cache_directory: vault/onedrive_cache
+  sync_interval_hours: 4
+
+# Logging settings
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: logs/pcp.log
+
+# Skills configuration
+# Based on Moltbot's AgentSkills pattern
+skills:
+  # Skill directories (in precedence order, highest first)
+  directories:
+    - /workspace/skills          # Workspace skills (highest priority)
+    - .claude/skills             # Claude Code skills
+
+  # Per-skill configuration
+  entries:
+    # Voice transcription skill
+    voice-transcription:
+      enabled: true
+      model: whisper-1           # OpenAI model
+      language: null             # Auto-detect (or 'en', 'es', etc.)
+      fallback_to_local: true    # Use local whisper if API fails
+      max_file_size_mb: 25
+
+    # Email processing
+    email-processing:
+      enabled: true
+      draft_only: true           # Never auto-send emails
+      fetch_limit: 50
+
+    # Twitter agent
+    twitter-agent:
+      enabled: true
+      post_mode: draft_only      # Never auto-post
+
+    # Task delegation
+    task-delegation:
+      enabled: true
+      default_mode: auto         # auto, subagent, or legacy
+
+    # Overleaf integration
+    overleaf-integration:
+      enabled: true
+
+    # Brief generation
+    brief-generation:
+      enabled: true
+
+    # PowerPoint builder
+    powerpoint-builder:
+      enabled: true
+      default_theme: default       # default, dark, minimal
+      max_bullets_per_slide: 5
+      prefer_png: true             # Prefer PNG for images

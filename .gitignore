@@ -1,0 +1,79 @@
+# ============================================
+# PCP .gitignore - Protects personal data
+# ============================================
+
+# === PERSONAL DATA (CRITICAL - never commit) ===
+vault/
+knowledge/
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# === PERSONAL CONFIGURATION ===
+# Personal overrides and config - this is where your personal
+# CLAUDE.local.md, twitter operating manual, etc. live
+personal/
+
+# === CREDENTIALS & AUTH ===
+.claude/.credentials*
+.claude/settings.local.json
+config/environments/*.env
+!config/environments/*.env.example
+config/twitter_cookies.json
+config/*_cookies.json
+overleaf/config/session_cookie.txt
+.env
+
+# === CLAUDE RUNTIME CACHES ===
+.claude/debug/
+.claude/projects/
+.claude/todos/
+.claude/statsig/
+.claude/stats-cache.json
+.claude/shell-snapshots/
+.claude/session-env/
+.claude/agents/
+.claude/plans/
+
+# === RUNTIME STATE ===
+.agent/
+logs/
+*.log
+
+# === PYTHON ===
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# === PERSONAL REFERENCES ===
+# Any personal reference documents with PII
+references/
+.claude/skills/*/references/
+
+# === GENERATED/TEMPORARY ===
+/tmp/
+*.backup*
+tim-workspace/
+core-docs/
+
+# === OLD GIT HISTORY ===
+.git-old-history/
+
+# === OS ===
+.DS_Store
+*.swp
+*.swo
+*~
+Thumbs.db
+
+# === IDE ===
+.idea/
+.vscode/
+*.code-workspace

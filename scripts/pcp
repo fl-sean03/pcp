@@ -1,0 +1,77 @@
+#!/bin/bash
+# PCP CLI - wrapper for PCP vault operations
+# Install: sudo ln -sf /workspace/scripts/pcp /usr/local/bin/pcp
+
+PCP_DIR="/workspace/scripts"
+
+show_help() {
+    cat << 'EOF'
+PCP - Personal Control Plane CLI
+
+Usage: pcp <command> [options]
+
+Commands:
+  capture, c    Capture text to vault
+  search, s     Search vault
+  context       Get project context
+  brief         Generate daily brief
+  sessions      Session management (alias for 'sessions' command)
+  help          Show this help
+
+Examples:
+  pcp capture "talked to John about API rate limits"
+  pcp c "quick note"
+  pcp search "rate limiting"
+  pcp s "john api"
+  pcp context alpha-trader
+  pcp brief
+  pcp brief --weekly
+EOF
+}
+
+case "$1" in
+    capture|c)
+        shift
+        if [ -z "$1" ]; then
+            echo "Usage: pcp capture \"text to capture\""
+            exit 1
+        fi
+        python3 "$PCP_DIR/vault_v2.py" capture "$@"
+        ;;
+    search|s)
+        shift
+        if [ -z "$1" ]; then
+            echo "Usage: pcp search \"query\""
+            exit 1
+        fi
+        python3 "$PCP_DIR/vault_v2.py" search "$@"
+        ;;
+    context)
+        shift
+        if [ -z "$1" ]; then
+            echo "Usage: pcp context <project_name_or_id>"
+            exit 1
+        fi
+        python3 "$PCP_DIR/vault_v2.py" context "$@"
+        ;;
+    brief)
+        shift
+        python3 "$PCP_DIR/brief.py" "$@"
+        ;;
+    sessions)
+        shift
+        python3 "$PCP_DIR/session_manager.py" "$@"
+        ;;
+    help|--help|-h)
+        show_help
+        ;;
+    *)
+        if [ -z "$1" ]; then
+            show_help
+        else
+            echo "Unknown command: $1"
+            echo "Run 'pcp help' for usage"
+            exit 1
+        fi
+        ;;
+esac

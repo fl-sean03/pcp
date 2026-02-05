@@ -1,0 +1,59 @@
+# PCP Development Container
+#
+# Host paths are configured via environment variables:
+#   PCP_HOST_WORKSPACE - Host workspace directory (default: ~/Workspace)
+#   PCP_HOST_HOME - Host home directory (default: ~)
+#   PCP_HOST_RCLONE - rclone config directory (default: ~/.config/rclone)
+#
+# Example .env file (create in same directory):
+#   PCP_HOST_WORKSPACE=/home/youruser/Workspace
+#   PCP_HOST_HOME=/home/youruser
+#   PCP_HOST_RCLONE=/home/youruser/.config/rclone
+
+services:
+  pcp-agent-dev:
+    build: .
+    container_name: pcp-agent-dev
+    restart: unless-stopped
+    volumes:
+      # Workspace (read-write for agent to modify its own code)
+      - .:/workspace:rw
+      # Isolated Claude credentials (not shared with other agents)
+      - ./.claude:/home/pcp/.claude:rw
+      # Lock file for agent switchboard
+      - /var/lock:/var/lock:rw
+      # Docker socket for self-modification (rebuild/restart)
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Discord attachments (shared with agent-gateway)
+      - /tmp/discord_attachments:/tmp/discord_attachments:rw
+      # Overleaf integration projects (optional - create if using Overleaf)
+      - ${PCP_HOST_WORKSPACE:-/tmp}/overleaf-integration:/workspace/overleaf:rw
+      # rclone config for cloud storage access (rw for token refresh)
+      - ${PCP_HOST_RCLONE:-/tmp}:/home/pcp/.config/rclone:rw
+      # FULL USER WORKSPACE ACCESS - all projects, tools, and work
+      - ${PCP_HOST_WORKSPACE:-/tmp}:/hostworkspace:rw
+      # User home directory for dotfiles, configs, scripts (read-only)
+      - ${PCP_HOST_HOME:-/tmp}:/hosthome:ro
+    environment:
+      - HOME=/home/pcp
+      # Discord webhook URL (set in .env or environment)
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL:-}
+      # Discord channel IDs for notifications
+      - PCP_DISCORD_CHANNEL=${PCP_DISCORD_CHANNEL:-}
+      - PCP_DISCORD_CHANNEL_DEV=${PCP_DISCORD_CHANNEL_DEV:-}
+    networks:
+      - agentops-proxy
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import sqlite3; sqlite3.connect('/workspace/vault/vault.db').execute('SELECT 1')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  agentops-proxy:
+    external: true

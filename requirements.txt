@@ -1,0 +1,23 @@
+# PCP Python Dependencies
+# Install: pip install -r requirements.txt
+
+# HTTP requests
+requests>=2.31.0
+
+# Vector database for semantic search
+chromadb>=0.4.0
+
+# Date/time parsing
+python-dateutil>=2.8.0
+
+# OCR for images
+pytesseract>=0.3.10
+
+# Image processing
+Pillow>=10.0.0
+
+# PDF text extraction
+PyPDF2>=3.0.0
+
+# Browser automation
+playwright>=1.40.0

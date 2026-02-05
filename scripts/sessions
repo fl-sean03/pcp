@@ -1,0 +1,6 @@
+#!/bin/bash
+# Sessions CLI - wrapper for session_manager.py
+# Install: sudo ln -sf /workspace/scripts/sessions /usr/local/bin/sessions
+
+PCP_DIR="/workspace/scripts"
+exec python3 "$PCP_DIR/session_manager.py" "$@"

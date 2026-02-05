@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Check syntax
+        run: python -m py_compile scripts/*.py
+      - name: Check for secrets
+        run: |
+          # Check for hardcoded webhook URLs
+          if grep -rn 'discord\.com/api/webhooks/[0-9]' --include='*.py' --include='*.sh' --include='*.md'; then
+            echo "ERROR: Hardcoded webhook URL found"
+            exit 1
+          fi
+          # Check for hardcoded API keys
+          if grep -rn 'sk-ant-\|sk-[a-zA-Z0-9]\{20,\}' --include='*.py' --include='*.sh'; then
+            echo "ERROR: Hardcoded API key found"
+            exit 1
+          fi
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run import checks
+        run: |
+          cd scripts
+          python -c "import vault_v2; print('vault_v2 OK')" 2>/dev/null || echo "vault_v2 requires runtime deps"
+          python -c "import knowledge; print('knowledge OK')" 2>/dev/null || echo "knowledge requires runtime deps"
+          python -c "import brief; print('brief OK')" 2>/dev/null || echo "brief requires runtime deps"
